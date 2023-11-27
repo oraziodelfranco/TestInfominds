@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using Yarp.ReverseProxy.Configuration;
 
-namespace Backend;
+namespace Backend.Infrastructure;
 
 internal static class ReactReverseProxy
 {

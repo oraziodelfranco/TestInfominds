@@ -1,0 +1,110 @@
+﻿@using System.Xml.Serialization
+@using BlazorDownloadFile
+
+@page "/customers"
+
+<MudText Typo="Typo.h4" Style="font-weight:bold;">Customers</MudText>
+    <MudDivider></MudDivider>
+    <MudDivider></MudDivider>
+    <MudSpacer></MudSpacer>
+    <MudSpacer></MudSpacer>
+
+<MudGrid Spacing="2" Justify="Justify.Center">
+    @*Filtri*@
+    <MudItem xs="5">
+        <MudTextField @bind-Value="@_filtroNome" Label="Nome" Variant="Variant.Outlined" HelperText="Inserire il nome anche parziale" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Outlined.Cancel" OnAdornmentClick="searchNameReset" />
+    </MudItem>
+    <MudItem xs="5">
+        <MudTextField @bind-Value="@_filtroEmail" Label="E-Mail" Variant="Variant.Outlined" HelperText="Inserire l'indirizzo email anche parziale" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Outlined.Cancel" OnAdornmentClick="searchEmailReset" />
+    </MudItem>
+    <MudItem xs="2">
+        <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Search" Color="Color.Primary" OnClick="FiltraLista">Filtra</MudButton>
+    </MudItem>
+    <MudItem xs="2">
+        <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Search" Color="Color.Primary" OnClick="GeneraXML">Esporta in XML</MudButton>
+    </MudItem>
+    <MudItem xs="10">
+    </MudItem>
+    <MudItem xs="12">
+        <MudSpacer />
+    </MudItem>
+    <MudItem xs="12">
+        @* Griglia dei Customers *@
+        <MudTable Items="@collCustomer"
+                  Dense="true"
+                  Bordered="true"
+                  FixedHeader="true"
+                  RowsPerPage="200"
+                  Hover="true">
+            <HeaderContent>
+                <MudTh>ID</MudTh>
+                <MudTh>Name</MudTh>
+                <MudTh>Address</MudTh>
+                <MudTh>Email</MudTh>
+                <MudTh>Phone</MudTh>
+                <MudTh>Iban</MudTh>
+                <MudTh>Code</MudTh>
+                <MudTh>Description</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>@context.Id</MudTd>
+                    <MudTd>@context.Name</MudTd>
+                    <MudTd>@context.Address</MudTd>
+                    <MudTd>@context.Email</MudTd>
+                    <MudTd>@context.Phone</MudTd>
+                    <MudTd>@context.Iban</MudTd>
+                    <MudTd>@context.Category.Code</MudTd>
+                    <MudTd>@context.Category.Description</MudTd>
+            </RowTemplate>
+        </MudTable> 
+    </MudItem>	
+</MudGrid>
+
+    @code {
+    [Inject] public IBlazorDownloadFileService BlazorDownloadFileService { get; set; }
+    private string _filtroNome = "";
+    private string _filtroEmail = "";
+    private ICollection<webapi.CustomersListQueryResponse> collCustomer;
+
+    protected override void OnInitialized()
+    {
+        FiltraLista();
+    }
+    private void FiltraLista()
+    {
+        //La stringa Url potrebbe essere messa in un file di configurazione per il recupero dinamico
+        string strUrl = @"http://localhost:10000/";
+        HttpClient httpClient = new HttpClient();
+        Task<ICollection<webapi.CustomersListQueryResponse>> ret;
+
+        var client = new FrontEndBlazor.webapi.webapiserver(strUrl, httpClient);
+        ret = client.GetCustomersListAsync(_filtroNome, _filtroEmail);
+        //Chiamata e attesa dei risultati.
+        ret.Wait();
+
+        //modifica dei risultati con aggiornamento della griglia in pagina.
+        collCustomer = ret.Result;
+    }
+    private void searchNameReset()
+    {
+        _filtroNome = "";
+    }
+    private void searchEmailReset()
+    {
+        _filtroEmail = "";
+    }
+
+    public async Task GeneraXML()
+    {
+        var serializer = new XmlSerializer(collCustomer.GetType());
+
+        using (var writer = new MemoryStream())
+        {
+            serializer.Serialize(writer, collCustomer);
+
+            string fileName = "XML-EXPORT-" + DateTime.Now.ToString("dd-MM-yyyy-hh-mm-ss") + ".xml";
+
+            await BlazorDownloadFileService.DownloadFile(fileName, writer, @"application/xml");
+        }
+    }
+}

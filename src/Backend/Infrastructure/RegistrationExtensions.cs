@@ -1,4 +1,4 @@
-namespace Backend;
+namespace Backend.Infrastructure;
 
 static class RegistrationExtensions
 {

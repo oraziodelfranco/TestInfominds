@@ -50,6 +50,7 @@ class CustomerSeeding : SeedEntity<BackendContext, Customer>
                 Phone = faker.Phone.PhoneNumber(),
                 Iban = faker.Finance.Iban(),
                 CustomerCategoryId = faker.PickRandom(CustomerCategoryIdList),
+                //Non viene caricato l'oggetto CustomerCategory
             };
         }
     }

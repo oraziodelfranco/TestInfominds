@@ -1,0 +1,34 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider Theme="MyMudTheme" />
+
+<MudLayout>
+    <MudAppBar Elevation="1" Bottom="true" Color="Color.Primary">
+        <NavMenu/>
+    </MudAppBar>
+    <MudMainContent Class="pa-2">
+        @Body
+        <MudGrid>
+            <MudItem xs="12">
+                <MudPaper Height="70px"></MudPaper>
+            </MudItem>
+        </MudGrid>
+    </MudMainContent>
+</MudLayout>
+
+@code
+{
+    MudTheme MyMudTheme = new MudTheme()
+        {
+            Palette = new PaletteLight()
+            {
+                Primary = "#00cc99",
+                Secondary = "#FF9900",
+                Tertiary = "#CC0099",
+                AppbarBackground = "#b71c1c",
+                Background = "#ffffff",
+                Surface = "#ffffff",
+                AppbarText = "#ffffff"
+            }
+        };
+}
